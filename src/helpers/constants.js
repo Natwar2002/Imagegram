@@ -1,0 +1,1 @@
+export const BASE_URL = "https://image-gram.onrender.com/api/v1";
