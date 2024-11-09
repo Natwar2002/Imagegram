@@ -15,7 +15,8 @@ function SignInForm() {
         e.preventDefault();
         try {
             const response = await loginUser(email, password);
-            const token = response.data.token;
+            const token = response.data.data;
+            console.log("Token:", token); 
             setAuthToken(token);
             navigate('/feed');
         } catch (error) {

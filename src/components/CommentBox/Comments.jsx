@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { createComment } from '../../services/createComment.js';
 
-function Comments({ comments, showComments, closeComment }) {
+function Comments({ comments, showComments, closeComment, postId }) {
     if (!showComments) return null;
+    const [content, setContent] = useState('');
     const [visibleReplies, setVisibleReplies] = useState({});
 
     const toggleRepliesVisibility = (commentId) => {
@@ -10,6 +12,21 @@ function Comments({ comments, showComments, closeComment }) {
             [commentId]: !prev[commentId]
         }));
     };
+
+    function handleCommentContent(e) {
+        setContent(e.target.value);
+        console.log(content);
+    }
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        try {
+            const response = await createComment({ content, onModel: "Post", postId });
+            console.log(response);
+        } catch (error) {
+            console.error("Error creating post:", error);
+        }
+    }
 
     return (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
@@ -70,6 +87,15 @@ function Comments({ comments, showComments, closeComment }) {
                         </li>
                     ))}
                 </ul>
+                <form className="border-t border-gray-600 flex" onSubmit={handleSubmit}>
+                    <input 
+                        className="w-full bg-inherit outline-none"
+                        value={content}
+                        onChange={handleCommentContent}
+                        placeholder="Add a comment..."
+                    />
+                    <button type="submit" className="text-blue-700">Post</button>
+                </form>
             </div>
         </div>
     );
