@@ -5,7 +5,7 @@ export async function loginUser(email, password) {
         const response = await axiosInstance.post('/user/signin', { email, password });
         return response;
     } catch (error) {
-        console.log(error);
+        console.log("Error signing in:", error.response ? error.response.data : error.message);
         return null;
     }
 }

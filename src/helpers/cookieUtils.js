@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 
 export function setAuthToken(token) {
-    console.log(token);
     Cookies.set('authToken', token, { expires: 1 });
 }
 
