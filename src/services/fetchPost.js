@@ -4,6 +4,7 @@ export async function fetchPost(page) {
     const limit = 9;
     try {
         const response = await axiosInstance.get(`/posts?limit=${limit}&offset=${page}`);
+        console.log(response.data);
         return response.data;
     } catch (error) {
         console.log(error);

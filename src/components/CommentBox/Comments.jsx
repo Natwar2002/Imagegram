@@ -1,10 +1,27 @@
 import { useState } from "react";
 import { createComment } from '../../services/createComment.js';
+import { useQuery } from "react-query";
+import Loader from "../Loader/Loader.jsx";
+import {getAllCommentsOfAPost} from '../../services/getAllCommentsOfAPost.js';
 
-function Comments({ comments, showComments, closeComment, postId }) {
+function Comments({ showComments, closeComment, commentableId }) {
     if (!showComments) return null;
     const [content, setContent] = useState('');
     const [visibleReplies, setVisibleReplies] = useState({});
+
+    const { data: comments, isLoading, isError, error } = useQuery(
+        ['comments', commentableId],
+        () => getAllCommentsOfAPost(commentableId),
+        { enabled: !!commentableId } // Only run query if commentableId exists
+    );
+
+    if(isError) {
+        return <div>Error : {error.message}</div>
+    }
+
+    if(isLoading) {
+        return <Loader />
+    }
 
     const toggleRepliesVisibility = (commentId) => {
         setVisibleReplies((prev) => ({
@@ -15,16 +32,15 @@ function Comments({ comments, showComments, closeComment, postId }) {
 
     function handleCommentContent(e) {
         setContent(e.target.value);
-        console.log(content);
     }
 
-    async function handleSubmit(e) {
+    async function handleSubmit(e) {        
         e.preventDefault();
         try {
-            const response = await createComment({ content, onModel: "Post", postId });
-            console.log(response);
+            const comment = await createComment({ content, onModel: "Post", commentableId });
+            setContent('');
         } catch (error) {
-            console.error("Error creating post:", error);
+            console.log("Error creating the comment: ",error);
         }
     }
 
@@ -38,13 +54,16 @@ function Comments({ comments, showComments, closeComment, postId }) {
                     </button>
                 </div>
                 <ul>
-                    {comments?.map((comment, index) => (
-                        <li key={index} className="text-gray-300 mb-4">
+                    {comments?.data?.map((comment) => (
+                        <li key={comment._id} className="text-gray-300 mb-4">
                             <div className="flex justify-between">
-                                <span className="text-white mr-2">
-                                    <span className="font-bold">{comment?.userId?.username}</span>
-                                    : {comment?.content?.trim()}
-                                </span>
+                                <div className="mr-2">
+                                    <p className="flex items-center gap-2">
+                                        <img src={comment?.userId?.avatar} className="w-[30px] h-[30px] border rounded-full"/>
+                                        <span>{comment?.userId?.username}</span>
+                                        <span className="text-gray-500">{comment?.content?.trim()}</span>
+                                    </p>
+                                </div>
                                 <i className="fa-regular fa-heart text-sm"></i>
                             </div>
 
@@ -57,7 +76,7 @@ function Comments({ comments, showComments, closeComment, postId }) {
                                 <div>Reply</div>
                             </div>
 
-                            { visibleReplies[comment._id] && (
+                            { visibleReplies[comment?._id] && (
                                 <ul className="ml-5 mt-2">
                                     {comment.replies.map((reply) => (
                                         <li key={reply._id} className="text-gray-400 mb-2">
@@ -78,7 +97,7 @@ function Comments({ comments, showComments, closeComment, postId }) {
                                 </ul>
                             )}
 
-                            {comment?.replies?.length > 0 && <div onClick={()=> toggleRepliesVisibility(comment._id)}>
+                            {comment?.replies?.length > 0 && <div onClick={() => toggleRepliesVisibility(comment._id)}>
                                 <button className="text-[10px] ml-4 text-blue-500">
                                     {visibleReplies[comment._id] ? "Hide Replies" : "Show Replies"}
                                 </button>
@@ -93,6 +112,7 @@ function Comments({ comments, showComments, closeComment, postId }) {
                         value={content}
                         onChange={handleCommentContent}
                         placeholder="Add a comment..."
+                        required
                     />
                     <button type="submit" className="text-blue-700">Post</button>
                 </form>

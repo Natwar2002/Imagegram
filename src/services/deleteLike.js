@@ -1,17 +1,16 @@
 import axiosInstance from '../helpers/axiosInstance.js'
 import { getAuthToken } from '../helpers/cookieUtils.js';
 
-export async function createComment({ content, onModel, commentableId }) {
+export async function deleteLike({ postId: likeableId, onModel }) {
     const token = getAuthToken();
-    console.log(content, commentableId);
-    
     try {
-        const response = await axiosInstance.post('/comments', { content, onModel, commentableId }, {
+        const response = await axiosInstance.delete('/likes', { likeableId, onModel }, {
             headers: {
                 "x-access-token": token,
             }
         });
-        console.log("Comment created successfully: ", response.data);
+        console.log("Unliked:", response.data);
+        
         return response.data;
     } catch (error) {
         console.error(error);

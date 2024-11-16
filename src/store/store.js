@@ -4,6 +4,8 @@ const store = create( (set) =>({
     email: '',
     username: '',
     password: '',
+    error: '',
+    success: '',
     setEmail: (newEmail) => set( (state) => {
         return {
             ...state,
@@ -20,6 +22,18 @@ const store = create( (set) =>({
         return {
             ...state,
             password: newPassword
+        }
+    }),
+    setError: (newError) => set( (state) => {
+        return {
+            ...state,
+            error: newError
+        }
+    }),
+    setSuccess: (newSuccess) => set( (state) => {
+        return {
+            ...state,
+            success: newSuccess
         }
     }),
 }));
